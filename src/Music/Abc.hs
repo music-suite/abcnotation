@@ -1,4 +1,6 @@
 
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+
 -------------------------------------------------------------------------------------
 -- |
 -- Copyright   : (c) Hans Hoglund 2012
@@ -16,13 +18,13 @@
 -------------------------------------------------------------------------------------
 
 module Music.Abc (
-        Abc(..),     
+        AbcFile(..),     
 
-        AbcHeader(..),
+        FileHeader(..),
         Information(..),
         Directive(..),
 
-        AbcElement(..),
+        Element(..),
 
         -- * Import and export functions
         readAbc,
@@ -31,20 +33,56 @@ module Music.Abc (
 
 
 
-type Abc = [AbcElement]
+data AbcFile = AbcFile FileHeader [Element]
 
-data AbcHeader = AbcHeader [Information] [Directive]
+data FileHeader = FileHeader [Information] [Directive]
+    deriving (Eq, Ord, Show)
+
 data Information = Information Char String
-data Directive = Directive
+    deriving (Eq, Ord, Show)
 
-data AbcElement 
+data Directive = Directive
+    deriving (Eq, Ord, Show)
+
+
+data Element 
     = AbcTune ()
     | FreeText String
-    | TypesetText ()
+    | TypesetText String
+    deriving (Eq, Ord, Show)
 
 
-readAbc :: String -> Abc
+
+
+-- Base types
+
+newtype Duration = Duration { getDuration :: Rational }
+
+data PitchClass = C | D | E | F | G | A | B
+    deriving (Eq, Ord, Show, Enum)
+
+data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
+    deriving (Eq, Ord, Show, Enum)
+
+newtype Octave = Octave { getOctave :: Int }
+    deriving (Eq, Ord, Show, Enum)
+
+newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
+    deriving (Eq, Ord, Show)
+
+data Barline
+    = Barline
+    | DoubleBarline Bool Bool   -- thick? thick?
+    | Repeat Int Bool Bool      -- times end? begin?
+    | DottedBarline Barline
+    | InvisibleBarline Barline
+
+
+    
+    
+
+readAbc :: String -> AbcFile
 readAbc = error "Not impl"
 
-showAbc :: Abc -> String
+showAbc :: AbcFile -> String
 showAbc = error "Not impl"

@@ -38,20 +38,21 @@ import Music.Abc
 --  * No support for macros (§9)
 --  * No support for outdated syntax (§10)
 --  * Stylesheet directives are ignored (§11)
+--  * Typeset text is ignored (§2.2.3)
 --  * Strict interpretation assumed (§12)
 
 
 -- |
 -- Parse a module description, returning an error if unsuccessful.
 --
-parse :: String -> Either ParseError Abc
+parse :: String -> Either ParseError AbcFile
 parse = runParser abcFile () ""
                  
 -------------------------------------------------------------------------------------
 -- Parsers
 -------------------------------------------------------------------------------------
 
-abcFile :: Parser Abc
+abcFile :: Parser AbcFile
 abcFile = do                      
     -- optional byteOrderMark
     string "%abc"
@@ -60,12 +61,12 @@ abcFile = do
     fileBody
     return undefined
 
-fileHeader :: Parser AbcHeader
-fileHeader = fmap (uncurry AbcHeader . partitionEithers) $ many1 $ mzero 
+fileHeader :: Parser FileHeader
+fileHeader = fmap (uncurry FileHeader . partitionEithers) $ many1 $ mzero 
     <|> fmap Left informationField 
     <|> fmap Right styleSheetDirective
 
-fileBody :: Parser [AbcElement]
+fileBody :: Parser [Element]
 fileBody = (flip sepBy) emptyLine $ mzero
     <|> fmap AbcTune abcTune
     <|> fmap FreeText freeText 
@@ -79,7 +80,7 @@ informationField = do
     char '\n'              
     return undefined
 
--- Not parsed, see Limitations above
+-- Not parsed, see Limitations
 styleSheetDirective :: Parser Directive
 styleSheetDirective = mzero
 
@@ -97,8 +98,9 @@ abcTune = undefined
 freeText :: Parser String
 freeText = undefined
 
-typeSetText :: Parser ()
-typeSetText = undefined
+-- Not parsed, see Limitations
+typeSetText :: Parser String
+typeSetText = mzero
 
 
 -------------------------------------------------------------------------------------
