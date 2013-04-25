@@ -1,0 +1,29 @@
+
+name:               abcnotation
+version:            0.5
+cabal-version:      >= 1.2
+author:             Hans Hoglund
+maintainer:         Hans Hoglund
+license:            BSD3
+license-file:       COPYING
+synopsis:           Haskell represenatation and parser for ABC notation.
+category:           Music
+tested-with:        GHC
+build-type:         Simple
+
+description: 
+    A Haskell representation and parser for ABC notation. Based on the 2.1 standard. 
+    
+    ABC notation is a text-based music notation system designed to be comprehensible by both people and 
+    computers. For more information see <http://abcnotation.com>.
+
+library                    
+    build-depends: 
+        base >= 4 && < 5,
+        semigroups,
+        prettify,
+        parsec
+    hs-source-dirs: src
+    exposed-modules:
+        Music.Abc
+        Music.Abc.Parser
