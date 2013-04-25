@@ -15,7 +15,8 @@ module Music.Abc.Parser (
     parse
   ) where
 
-import Data.Monoid
+import Data.Monoid   
+import Data.Either
 import Control.Monad
 import Control.Applicative hiding ((<|>), optional, many)
 
@@ -26,6 +27,12 @@ import Text.Parsec.String
 import Music.Abc
 
 -- TODO information field verification (header/body)
+
+-- Limitations:
+--  * Pseudo-comments/stylesheet directives are not parsed
+--  * No macro support
+--  * No legacy support (plus style decorations etc)
+--  * Limited support for volatile features (parts, clefs, chord symbols, numbering, overlay) 
 
 -- |
 -- Parse a module description, returning an error if unsuccessful.
@@ -46,10 +53,10 @@ abcFile = do
     fileBody
     return undefined
 
-fileHeader :: Parser [Information]
-fileHeader = many1 $ mzero 
-    <|> informationField 
-    <|> styleSheetDirective
+fileHeader :: Parser AbcHeader
+fileHeader = fmap (uncurry AbcHeader . partitionEithers) $ many1 $ mzero 
+    <|> fmap Left informationField 
+    <|> fmap Right styleSheetDirective
 
 fileBody :: Parser [AbcElement]
 fileBody = (flip sepBy) emptyLine $ mzero
@@ -65,10 +72,17 @@ informationField = do
     char '\n'              
     return undefined
 
+-- Not parsed, see Limitations above
 styleSheetDirective :: Parser Directive
-styleSheetDirective =
-    return undefined
+styleSheetDirective = mzero
 
+byteOrderMark :: Parser ()
+byteOrderMark = do
+    char '\xFFFE' <|> char '\xFEFF'
+    return ()
+
+version :: Parser Double
+version = undefined
 
 abcTune :: Parser ()
 abcTune = undefined
@@ -79,15 +93,6 @@ freeText = undefined
 typeSetText :: Parser ()
 typeSetText = undefined
 
-
-
-byteOrderMark :: Parser ()
-byteOrderMark = do
-    char '\xFFFE' <|> char '\xFEFF'
-    return ()
-
-version :: Parser Double
-version = undefined
 
 -------------------------------------------------------------------------------------
 -- Lexer
