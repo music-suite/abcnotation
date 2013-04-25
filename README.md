@@ -10,7 +10,7 @@ both people and computers. For more information see <http://abcnotation.com>.
 
   * Limited support for *volatile* features
   * Limited support for text strings (§8.2)
-  * No mnemonics
+    * No mnemonics
     * No entities
     * Unicode escapes are supported
   * No support for macros (§9)
