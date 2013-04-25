@@ -6,7 +6,7 @@ author:             Hans Hoglund
 maintainer:         Hans Hoglund
 license:            BSD3
 license-file:       COPYING
-synopsis:           Haskell represenatation and parser for ABC notation.
+synopsis:           Haskell representation and parser for ABC notation.
 category:           Music
 tested-with:        GHC
 build-type:         Simple
