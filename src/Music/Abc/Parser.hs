@@ -15,6 +15,7 @@ module Music.Abc.Parser (
     parse
   ) where
 
+import Data.Monoid
 import Control.Monad
 import Control.Applicative hiding ((<|>), optional, many)
 
@@ -24,9 +25,69 @@ import Text.Parsec.String
 
 import Music.Abc
 
-parse :: String -> Abc
-parse = notSupported "parse"
+-- TODO information field verification (header/body)
 
+-- |
+-- Parse a module description, returning an error if unsuccessful.
+--
+parse :: String -> Either ParseError Abc
+parse = runParser abcFile () ""
+                 
+-------------------------------------------------------------------------------------
+-- Parsers
+-------------------------------------------------------------------------------------
+
+abcFile :: Parser Abc
+abcFile = do                      
+    -- optional byteOrderMark
+    string "%abc"
+    optional $ string "-" >> version
+    optional $ fileHeader    
+    fileBody
+    return undefined
+
+fileHeader :: Parser [Information]
+fileHeader = many1 $ mzero 
+    <|> informationField 
+    <|> styleSheetDirective
+
+fileBody :: Parser [AbcElement]
+fileBody = (flip sepBy) emptyLine $ mzero
+    <|> fmap AbcTune abcTune
+    <|> fmap FreeText freeText 
+    <|> fmap TypesetText typeSetText
+
+informationField :: Parser Information
+informationField = do
+    letter
+    char ':'
+    -- TODO anything not \n
+    char '\n'              
+    return undefined
+
+styleSheetDirective :: Parser Directive
+styleSheetDirective =
+    return undefined
+
+
+abcTune :: Parser ()
+abcTune = undefined
+
+freeText :: Parser String
+freeText = undefined
+
+typeSetText :: Parser ()
+typeSetText = undefined
+
+
+
+byteOrderMark :: Parser ()
+byteOrderMark = do
+    char '\xFFFE' <|> char '\xFEFF'
+    return ()
+
+version :: Parser Double
+version = undefined
 
 -------------------------------------------------------------------------------------
 -- Lexer
@@ -34,10 +95,10 @@ parse = notSupported "parse"
 
 lexer :: TokenParser ()
 lexer = makeTokenParser $ LanguageDef {
-    commentStart    =  "/*",
-    commentEnd      =  "*/",
-    commentLine     =  "//",
-    nestedComments  =  True,
+    commentStart    =  "[r:",
+    commentEnd      =  "]",
+    commentLine     =  "%",
+    nestedComments  =  False,
     identStart      =  (letter <|> char '_'),
     identLetter     =  (alphaNum <|> char '_'),
     opStart         =  mzero,
@@ -47,13 +108,7 @@ lexer = makeTokenParser $ LanguageDef {
     caseSensitive   =  True
     }
     where
-        reservedNames = [
-            "module", "import", "type", "tagname", "opaque", "enum", "union", "struct", "bitfield",
-            "Int", "Void", "Size", "Ptrdiff", "Intptr", "UIntptr",
-            "Char", "Short", "Int", "Long", "LongLong",
-            "UChar", "UShort", "UInt", "ULong", "ULongLong",
-            "Float", "Double", "LongDouble",
-            "Int8", "Int16", "Int32", "Int64", "UInt8", "UInt16", "UInt32", "UInt64" ]
+        reservedNames = []
 
 -- Convenient synonyms, not exported
 llex   = lexeme lexer
@@ -63,6 +118,8 @@ lname  = identifier lexer
 lres   = reserved lexer
 lspace = whiteSpace lexer
 
+emptyLine = newLine >> newLine
+newLine = string "\r\n" <|> string "\n"
 
 single x = [x]
 

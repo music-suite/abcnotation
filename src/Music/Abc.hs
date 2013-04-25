@@ -17,6 +17,9 @@
 
 module Music.Abc (
         Abc(..),
+        AbcElement(..),
+        Information(..),
+        Directive(..),
 
         -- * Import and export functions
         readAbc,
@@ -25,7 +28,15 @@ module Music.Abc (
 
 
 
-data Abc = Abc
+type Abc = [AbcElement]
+
+data AbcElement 
+    = AbcTune ()
+    | FreeText String
+    | TypesetText ()
+
+type Information = ()
+type Directive = ()
 
 readAbc :: String -> Abc
 readAbc = error "Not impl"
