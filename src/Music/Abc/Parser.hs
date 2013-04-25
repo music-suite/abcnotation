@@ -68,7 +68,7 @@ fileHeader = fmap (uncurry FileHeader . partitionEithers) $ many1 $ mzero
 
 fileBody :: Parser [Element]
 fileBody = (flip sepBy) emptyLine $ mzero
-    <|> fmap AbcTune abcTune
+    <|> fmap Tune abcTune
     <|> fmap FreeText freeText 
     <|> fmap TypesetText typeSetText
 
@@ -92,7 +92,7 @@ byteOrderMark = do
 version :: Parser Double
 version = undefined
 
-abcTune :: Parser ()
+abcTune :: Parser AbcTune
 abcTune = undefined
 
 freeText :: Parser String
