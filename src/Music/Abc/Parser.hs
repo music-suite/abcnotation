@@ -28,11 +28,18 @@ import Music.Abc
 
 -- TODO information field verification (header/body)
 
--- Limitations:
---  * Pseudo-comments/stylesheet directives are not parsed
---  * No macro support
---  * No legacy support (plus style decorations etc)
---  * Limited support for volatile features (parts, clefs, chord symbols, numbering, overlay) 
+-- ## Limitations:
+--
+--  * Limited support for *volatile* features
+--  * Limited support for text strings (§8.2)
+--    * No mnemonics
+--    * No entities
+--    * Unicode escapes are supported
+--  * No support for macros (§9)
+--  * No support for outdated syntax (§10)
+--  * Stylesheet directives are ignored (§11)
+--  * Strict interpretation assumed (§12)
+
 
 -- |
 -- Parse a module description, returning an error if unsuccessful.
