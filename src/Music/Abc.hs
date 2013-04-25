@@ -1,5 +1,5 @@
 
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TypeOperators, GeneralizedNewtypeDeriving #-}
 
 -------------------------------------------------------------------------------------
 -- |
@@ -36,13 +36,15 @@ module Music.Abc (
         
         -- ** Note stack
         Note(..),
-        GraceT(..),
-        BeamT(..),
-        SlurT(..),
+
         DecorationT(..),
+        SlurT(..),
+        BeamT(..),
+        GraceT(..),
         TupletT(..),
         DurationT(..),
         RestT(..),
+        (:|:),
         
         -- * Basic types
         -- ** Time
@@ -59,6 +61,7 @@ module Music.Abc (
 
         -- ** Structure
         Barline(..),
+        MultiRest(..),
 
         -- ** Information etc
         Information(..),
@@ -100,18 +103,21 @@ type TuneBody = [Music]
 
 -- One line of music code.
 data Music 
-    = Music [Either Note Barline]
+    = Music [Note :|: MultiRest :|: Barline :|: ()]
     deriving (Eq, Ord, Show)
 
-type Note = GraceT (SlurT (DecorationT (BeamT (TupletT (DurationT (RestT Pitch))))))
+newtype MultiRest = MultiRest { getMultiRest :: Int }
+    deriving (Eq, Ord, Show)
 
-type GraceT a       = (Bool, a)
-type BeamT a        = (Bool, a, Bool)
-type SlurT a        = (Bool, a, Bool)
+type Note = DecorationT (SlurT (BeamT (GraceT (TupletT (DurationT (RestT Pitch))))))
+
 type DecorationT a  = ([Decoration], a)
+type SlurT a        = (Bool, a, Bool)
+type BeamT a        = (Bool, a, Bool)
+type GraceT a       = (Bool, a)
 type TupletT a      = (Duration, a)
 type DurationT a    = (a, Duration)
-type RestT          = Maybe
+type RestT a        = Maybe (Maybe a) -- invisible/visible
 
 data Decoration
     = Trill                   --                "tr" (trill mark)
@@ -196,3 +202,7 @@ readAbc = error "Not impl"
 
 showAbc :: AbcFile -> String
 showAbc = error "Not impl"
+
+infixr 5 :|:
+type a :|: b = Either a b
+
