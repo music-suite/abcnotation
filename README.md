@@ -1,10 +1,12 @@
 
 # abcnotation
 
-A Haskell representation and parser for ABC notation 2.1.
+This package contains a Haskell representation and parser for ABC notation. 
 
-ABC notation is a text-based music notation system designed to be comprehensible by
-both people and computers. For more information see <http://abcnotation.com>.
+ABC notation is a text-based music notation system designed to be comprehensible by both people and 
+computers. For more information see <http://abcnotation.com>.
+
+Based on the 2.1 standard.
 
 ## Limitations
 
