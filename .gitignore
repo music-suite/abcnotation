@@ -1,1 +1,6 @@
 dist
+*.ly
+*.mid
+*.png
+test
+*.midi
