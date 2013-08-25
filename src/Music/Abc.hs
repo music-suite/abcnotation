@@ -143,7 +143,7 @@ type BeamT a        = (Bool, a, Bool)
 type GraceT a       = (Bool, a)
 type TupletT a      = (Duration, a)
 type DurationT a    = (a, Duration)
-type RestT a        = Maybe (Maybe a) -- invisible/visible
+type RestT a        = Maybe (Maybe a)       -- invisible/visible
 
 data Decoration
     = Trill                   -- "tr" (trill mark)
@@ -170,9 +170,7 @@ data Decoration
     | Open                    -- small circle above note indicating open string or harmonic
     | Thumb                   -- cello thumb symbol
     | Breath                  -- a breath mark (apostrophe-like) after note
-    -- !pppp! !ppp! !pp! !p!  dynamics marks
-    -- !mp! !mf! !f! !ff!     more dynamics marks
-    -- !fff! !ffff! !sfz!     more dynamics marks
+    | Dynamic Dynamic         -- Dynamics
     | Crescendo               -- start of a crescendo mark
     | EndCrescendo            -- end of a crescendo mark, placed after the last note
     | Diminuendo              -- start of a diminuendo mark
@@ -187,6 +185,11 @@ data Decoration
     | Mediumphrase            -- same, but extending down to the centre line
     | Longphrase              -- same, but extending 3/4 of the way down
     deriving (Eq, Ord, Show)
+
+data Dynamic
+    = PPPP | PPP | PP | P 
+    | MP | MF | F | FF
+    | FFF | FFFF | SFZ    
 
 
 -- Base types
