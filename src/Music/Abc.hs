@@ -187,10 +187,18 @@ data Decoration
     deriving (Eq, Ord, Show)
 
 data Dynamic
-    = PPPP | PPP | PP | P 
-    | MP | MF | F | FF
-    | FFF | FFFF | SFZ    
-
+    = PPPP 
+    | PPP 
+    | PP 
+    | P_ 
+    | MP 
+    | MF 
+    | F_ 
+    | FF
+    | FFF 
+    | FFFF 
+    | SFZ    
+    deriving (Eq, Ord, Show)
 
 -- Base types
 
