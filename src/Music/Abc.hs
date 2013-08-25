@@ -45,18 +45,24 @@ module Music.Abc (
         DurationT(..),
         RestT(..),
         (:|:),
+
         
         -- * Basic types
         -- ** Time
         Duration(..),  
         Meter(..),
+        Tempo(..),
         VoiceProps(..),
 
         -- ** Pitch
         PitchClass(..),
         Accidental(..),
         Octave(..),
-        Pitch(..),
+        Pitch(..),  
+        Key(..),
+        StemDirection(..),
+        Clef(..),
+        Mode(..),
 
         -- ** Symbols
         Symbol(..),  
@@ -115,9 +121,13 @@ data TuneHeader
         [Information]
     deriving (Eq, Ord, Show)
 
+-- | One line of music code.
 type TuneBody = [Music]
 
--- One line of music code.
+
+
+
+-- | One line of music code.
 data Music 
     = Music [Note :|: MultiRest :|: Barline :|: ()]
     deriving (Eq, Ord, Show)
