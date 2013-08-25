@@ -11,8 +11,8 @@
 -- Stability   : experimental
 -- Portability : portable
 --
--- A Haskell representation and parser for ABC notation. Based on the 2.1 standard. 
--- 
+-- A Haskell representation and parser for ABC notation. Based on the 2.1 standard.
+--
 -- For more information see <http://abcnotation.com>.
 --
 -------------------------------------------------------------------------------------
@@ -20,7 +20,7 @@
 module Music.Abc (
         -- * Abc format
         -- ** Files
-        AbcFile(..),     
+        AbcFile(..),
 
         -- *** File header
         FileHeader(..),
@@ -28,12 +28,12 @@ module Music.Abc (
 
         -- ** Tunes
         AbcTune(..),
-        TuneHeader(..), 
-        TuneBody(..), 
+        TuneHeader(..),
+        TuneBody(..),
 
         -- * Music
         Music(..),
-        
+
         -- ** Note stack
         Note(..),
 
@@ -46,10 +46,10 @@ module Music.Abc (
         RestT(..),
         (:|:),
 
-        
+
         -- * Basic types
         -- ** Time
-        Duration(..),  
+        Duration(..),
         Meter(..),
         Tempo(..),
         VoiceProps(..),
@@ -58,14 +58,14 @@ module Music.Abc (
         PitchClass(..),
         Accidental(..),
         Octave(..),
-        Pitch(..),  
+        Pitch(..),
         Key(..),
         StemDirection(..),
         Clef(..),
         Mode(..),
 
         -- ** Symbols
-        Symbol(..),  
+        Symbol(..),
 
         -- ** Decorations (articulation, dynamics etc)
         Decoration(..),
@@ -94,8 +94,8 @@ data AbcFile
 
 -- | File header (2.2.2).
 data FileHeader
-    = FileHeader 
-        [Information] 
+    = FileHeader
+        [Information]
         [Directive]
     deriving (Eq, Ord, Show)
 
@@ -109,15 +109,15 @@ data Element
         String                          -- ^ Typeset text (2.2.3).
     deriving (Eq, Ord, Show)
 
-data AbcTune 
-    = AbcTune 
-        TuneHeader 
+data AbcTune
+    = AbcTune
+        TuneHeader
         TuneBody
     deriving (Eq, Ord, Show)
 
 -- TODO verify X, T and K fields
-data TuneHeader 
-    = TuneHeader 
+data TuneHeader
+    = TuneHeader
         [Information]
     deriving (Eq, Ord, Show)
 
@@ -128,7 +128,7 @@ type TuneBody = [Music]
 
 
 -- | One line of music code.
-data Music 
+data Music
     = Music [Note :|: MultiRest :|: Barline :|: ()]
     deriving (Eq, Ord, Show)
 
@@ -187,17 +187,17 @@ data Decoration
     deriving (Eq, Ord, Show)
 
 data Dynamic
-    = PPPP 
-    | PPP 
-    | PP 
-    | P_ 
-    | MP 
-    | MF 
-    | F_ 
+    = PPPP
+    | PPP
+    | PP
+    | P_
+    | MP
+    | MF
+    | F_
     | FF
-    | FFF 
-    | FFFF 
-    | SFZ    
+    | FFF
+    | FFFF
+    | SFZ
     deriving (Eq, Ord, Show)
 
 -- Base types
@@ -257,7 +257,7 @@ data Information
     -- Remarks are discarded
     | Source String -- Uppland etc.
 
-    | SymbolLine Symbol 
+    | SymbolLine Symbol
     | TuneTitle String
     -- User defined not supported
 
@@ -267,7 +267,7 @@ data Information
     | Transcription String
     deriving (Eq, Ord, Show)
 
-type Key = (PitchClass, Mode)                   
+type Key = (PitchClass, Mode)
 
 -- | Optional string, beats, frequency (3.1.8)
 type Tempo = (Maybe String, [Duration], Duration)
@@ -304,8 +304,8 @@ data Mode
 
 -- | Abc directive.
 type Directive = (String, String)
-    
-    
+
+
 
 readAbc :: String -> AbcFile
 readAbc = error "Not impl"
