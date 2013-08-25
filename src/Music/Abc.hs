@@ -18,11 +18,13 @@
 -------------------------------------------------------------------------------------
 
 module Music.Abc (
+
+        ----------------------------------------------------------------------
+
         -- * Abc format
         -- ** Files
         AbcFile(..),
-        noVersion,
-        noHeader,
+
         -- *** File header
         FileHeader(..),
         Element(..),
@@ -32,27 +34,24 @@ module Music.Abc (
         TuneHeader(..),
         TuneBody(..),
 
+        ----------------------------------------------------------------------
+
         -- * Music
         Music(..),
 
-        -- ** Note stack
+        -- ** Notes
         Note(..),
-
         DecorationT(..),
         SlurT(..),
         BeamT(..),
         GraceT(..),
         DurationT(..),
         RestT(..),
-        (:|:),
 
-
-        -- * Basic types
         -- ** Time
         Duration(..),
         Meter(..),
         Tempo(..),
-        VoiceProps(..),
 
         -- ** Pitch
         PitchClass(..),
@@ -64,19 +63,27 @@ module Music.Abc (
         Clef(..),
         Mode(..),
 
+        -- ** Misc
+        VoiceProperties(..),
+
         -- ** Symbols
         Symbol(..),
 
-        -- ** Decorations (articulation, dynamics etc)
+        -- ** Aarticulation and dynamics
         Decoration(..),
+        Dynamic(..),
 
         -- ** Structure
         Barline(..),
         MultiRest(..),
 
-        -- ** Information etc
+        ----------------------------------------------------------------------
+
+        -- * Information
         Information(..),
         Directive(..),
+
+        ----------------------------------------------------------------------
 
         -- * Import and export
         readAbc,
@@ -85,6 +92,9 @@ module Music.Abc (
 
 import Network.URI (URI)
 
+
+--------------------------------------------------------------------------------
+
 -- | A full ABC file (2.2).
 data AbcFile
     = AbcFile
@@ -92,10 +102,6 @@ data AbcFile
         (Maybe FileHeader)
         [Element]
     deriving (Eq, Ord, Show)
-
-
-noVersion = Nothing
-noHeader  = Nothing
 
 -- | File header (2.2.2).
 data FileHeader
@@ -120,24 +126,25 @@ data AbcTune
         TuneBody
     deriving (Eq, Ord, Show)
 
--- TODO verify X, T and K fields
 data TuneHeader
     = TuneHeader
         [Information]
     deriving (Eq, Ord, Show)
 
 -- | One line of music code.
-type TuneBody = [Music]
+type TuneBody 
+    = [Music]
 
 
 
-
-
-
+--------------------------------------------------------------------------------
 
 -- | One line of music code.
 data Music
-    = Music [Note :|: MultiRest :|: Barline :|: ()]
+    = Music 
+        [Either Note 
+            (Either MultiRest 
+                Barline)]
     deriving (Eq, Ord, Show)
 
 -- TODO broken rhythm (4.4)
@@ -249,13 +256,9 @@ data Barline
 
 
 
-
+--------------------------------------------------------------------------------
 
 -- Base types
-
--- | Duration (4.3).
-newtype Duration = Duration { getDuration :: Rational }
-    deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
 -- | Accidentals (4.2).
 data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
@@ -265,11 +268,14 @@ data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
 data PitchClass = C | D | E | F | G | A | B
     deriving (Eq, Ord, Show, Enum, Bounded)
 
+-- | Octaves (4.1).
 newtype Octave = Octave { getOctave :: Int }
     deriving (Eq, Ord, Show, Enum, Num, Real, Integral)
 
+-- | Pitch (4.1, 4.2).
 newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
     deriving (Eq, Ord, Show)
+
 
 data StemDirection = Up | Down
     deriving (Eq, Ord, Show, Enum, Bounded)
@@ -277,7 +283,10 @@ data StemDirection = Up | Down
 data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
     deriving (Eq, Ord, Show, Enum, Bounded)
 
--- TODO add elements
+-- | Duration (4.3).
+newtype Duration = Duration { getDuration :: Rational }
+    deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
+
 data Information
     = Area String
     | Book String
@@ -286,28 +295,23 @@ data Information
     | FileUrl String URI
     | Group String
     | History String
-
     | Instruction Directive
     | Key Key
     | UnitNoteLength Duration
-
-    | Meter Meter
-    -- Macros not supported
-    | Notes String
-    | Origin String
-    | Parts -- TODO
-
-    | Tempo Tempo
-    | Rhythm String -- Polska, marsch etc.
-    -- Remarks are discarded
-    | Source String -- Uppland etc.
-
+    | Meter Meter            
+    | Macro                             -- ^ Macro (not supported)
+    | Notes String                      -- ^ Notes
+    | Origin String                     -- ^ Origin of tune.
+    | Parts
+    | Tempo Tempo                       -- ^ Tempo of tune.
+    | Rhythm String                     -- ^ Rhythm type of tune.
+    | Remark                            -- ^ Remarks (not supported)
+    | Source String                     -- ^ Source material.
     | SymbolLine Symbol
-    | TuneTitle String
-    -- User defined not supported
-
-    | Voice VoiceProps
-    | Words String -- TODO include separators
+    | Title String                      -- ^ Title of tune.
+    | UserDefined                       -- ^ User defined (not supported)
+    | Voice VoiceProperties
+    | Words String
     | ReferenceNumber Integer
     | Transcription String
     deriving (Eq, Ord, Show)
@@ -319,8 +323,8 @@ type Tempo = (Maybe String, [Duration], Duration)
 
 type Symbol = ()
 
-data VoiceProps
-    = VoiceProps
+data VoiceProperties
+    = VoiceProperties
         (Maybe String)
         (Maybe String)
         (Maybe StemDirection)
@@ -386,35 +390,35 @@ showAbc = error "Not impl"
     
 -}
 test = AbcFile 
-    (Just "1.2") 
-    (Just $ FileHeader [ 
-            ReferenceNumber     19004,
-            TuneTitle           "Silent Night",
-            TuneTitle           "Stille Nacht! Heilige Nacht!",
-            Rhythm              "Air",
-            Composer            "Franz Xaver Gruber, 1818",
-            Origin              "Austria",
-            Source              "Paul Hardy's Xmas Tunebook 2012",
-            Meter               (Simple $ 6/8),
-            UnitNoteLength      (1/8),
-            Tempo               (Nothing, [3/8], 60),
-            Key                 (C, Major),            
-
-            Words               "Silent night, holy night",
-            Words               "All is calm, all is bright",
-            Words               "Round yon Virgin Mother and Child",
-            Words               "Holy Infant so tender and mild",
-            Words               "Sleep in heavenly peace",
-            Words               "Sleep in heavenly peace"
-        ] []) 
+    (Just "1.2")
+    (Just $ FileHeader [] []) 
     [
-    
+        Tune (AbcTune 
+            (TuneHeader [
+                ReferenceNumber     19004,
+                Title               "Silent Night",
+                Title               "Stille Nacht! Heilige Nacht!",
+                Rhythm              "Air",
+                Composer            "Franz Xaver Gruber, 1818",
+                Origin              "Austria",
+                Source              "Paul Hardy's Xmas Tunebook 2012",
+                Meter               (Simple $ 6/8),
+                UnitNoteLength      (1/8),
+                Tempo               (Nothing, [3/8], 60),
+                Key                 (C, Major),            
+
+                Words               "Silent night, holy night",
+                Words               "All is calm, all is bright",
+                Words               "Round yon Virgin Mother and Child",
+                Words               "Holy Infant so tender and mild",
+                Words               "Sleep in heavenly peace",
+                Words               "Sleep in heavenly peace"
+            ]) 
+            [])
     ]
 
 
 
 
 
-infixr 5 :|:
-type a :|: b = Either a b
 
