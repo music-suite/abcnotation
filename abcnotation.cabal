@@ -12,16 +12,19 @@ tested-with:        GHC
 build-type:         Simple
 
 description: 
-    A Haskell representation and parser for ABC notation. Based on the 2.1 standard. 
-    
+    This package contains a Haskell representation and parser for ABC notation. 
+    .
     ABC notation is a text-based music notation system designed to be comprehensible by both people and 
     computers. For more information see <http://abcnotation.com>.
+    .
+    Based on the 2.1 standard.
 
 library                    
     build-depends: 
         base >= 4 && < 5,
         semigroups,
         prettify,
+        network,
         parsec
     hs-source-dirs: src
     exposed-modules:

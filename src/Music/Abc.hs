@@ -48,13 +48,18 @@ module Music.Abc (
         
         -- * Basic types
         -- ** Time
-        Duration(..),
+        Duration(..),  
+        Meter(..),
+        VoiceProps(..),
 
         -- ** Pitch
         PitchClass(..),
         Accidental(..),
         Octave(..),
         Pitch(..),
+
+        -- ** Symbols
+        Symbol(..),  
 
         -- ** Decorations (articulation, dynamics etc)
         Decoration(..),
