@@ -41,7 +41,6 @@ module Music.Abc (
         SlurT(..),
         BeamT(..),
         GraceT(..),
-        TupletT(..),
         DurationT(..),
         RestT(..),
         (:|:),
@@ -127,23 +126,47 @@ type TuneBody = [Music]
 
 
 
+
+
+
 -- | One line of music code.
 data Music
     = Music [Note :|: MultiRest :|: Barline :|: ()]
     deriving (Eq, Ord, Show)
 
-newtype MultiRest = MultiRest { getMultiRest :: Int }
-    deriving (Eq, Ord, Show)
+-- TODO broken rhythm (4.4)
 
-type Note = DecorationT (SlurT (BeamT (GraceT (TupletT (DurationT (RestT Pitch))))))
+-- Note (4.20) grace chordSym ann/dec acci note/rest octave dur
+type Note = DecorationT (SlurT (BeamT (GraceT (DurationT (RestT Pitch)))))
 
-type DecorationT a  = ([Decoration], a)
-type SlurT a        = (Bool, a, Bool)
-type BeamT a        = (Bool, a, Bool)
-type GraceT a       = (Bool, a)
-type TupletT a      = (Duration, a)
-type DurationT a    = (a, Duration)
+-- | Rests (4.5)
 type RestT a        = Maybe (Maybe a)       -- invisible/visible
+
+-- TODO clefs and transposition (4.6)
+
+-- | Beams (4.7)
+type BeamT a        = (Bool, a, Bool)
+
+-- | Slurs (4.11)
+type SlurT a        = (Bool, a, Bool)
+-- TODO ties (4.11)
+
+-- | Grace notes (4.12)
+type GraceT a       = (Bool, a)
+
+-- TODO tuplets (4.13)
+
+-- | Decorations (4.14)
+type DecorationT a  = ([Decoration], a)
+type DurationT a    = (a, Duration)
+
+-- TODO symbol lines (4.15)
+-- TODO redifinable symbols (4.16)
+
+-- TODO chords (4.17)
+-- TODO chord symbols (4.18)
+-- TODO annotations (4.19)
+
 
 data Decoration
     = Trill                   -- "tr" (trill mark)
@@ -200,15 +223,40 @@ data Dynamic
     | SFZ
     deriving (Eq, Ord, Show)
 
+-- Rests
+
+newtype MultiRest = MultiRest { getMultiRest :: Int }
+    deriving (Eq, Ord, Show)
+
+-- | Barline, including special barlines and repeats.
+data Barline
+    = Barline
+    | DoubleBarline Bool Bool   -- thick? thick?
+    | Repeat Int Bool Bool      -- times end? begin?
+    | DottedBarline Barline
+    | InvisibleBarline Barline
+    deriving (Eq, Ord, Show)
+
+-- TODO first and second repeats (4.9)
+-- TODO variant endings (4.10)
+
+
+
+
+
+
 -- Base types
 
+-- | Duration (4.3).
 newtype Duration = Duration { getDuration :: Rational }
     deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
-data PitchClass = C | D | E | F | G | A | B
+-- | Accidentals (4.2).
+data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
     deriving (Eq, Ord, Show, Enum, Bounded)
 
-data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
+-- | Pitch class (4.1).
+data PitchClass = C | D | E | F | G | A | B
     deriving (Eq, Ord, Show, Enum, Bounded)
 
 newtype Octave = Octave { getOctave :: Int }
@@ -222,15 +270,6 @@ data StemDirection = Up | Down
 
 data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
     deriving (Eq, Ord, Show, Enum, Bounded)
-
--- | Barline, including special barlines and repeats.
-data Barline
-    = Barline
-    | DoubleBarline Bool Bool   -- thick? thick?
-    | Repeat Int Bool Bool      -- times end? begin?
-    | DottedBarline Barline
-    | InvisibleBarline Barline
-    deriving (Eq, Ord, Show)
 
 -- TODO add elements
 data Information
