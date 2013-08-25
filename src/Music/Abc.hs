@@ -72,33 +72,42 @@ module Music.Abc (
         showAbc
   ) where
 
+import Network.URI (URI)
 
-
-data AbcFile 
-    = AbcFile 
-        FileHeader 
+-- | A full ABC file (2.2).
+data AbcFile
+    = AbcFile
+        (Maybe String)
+        (Maybe FileHeader)
         [Element]
 
-data FileHeader 
+-- | File header (2.2.2).
+data FileHeader
     = FileHeader 
         [Information] 
         [Directive]
     deriving (Eq, Ord, Show)
 
-data Element 
-    = Tune                                  
-        AbcTune                             -- ^ An Abc tune.
-    | FreeText                              
-        String                              -- ^ Free text, unused at the moment.
-    | TypesetText                           
-        String                              -- ^ Typeset text, unused at the moment.
+-- | Either a tune, free text or typeset text (2.2.3).
+data Element
+    = Tune
+        AbcTune                         -- ^ An Abc tune.
+    | FreeText
+        String                          -- ^ Free text (2.2.3).
+    | TypesetText
+        String                          -- ^ Typeset text (2.2.3).
     deriving (Eq, Ord, Show)
 
-data AbcTune = AbcTune TuneHeader TuneBody
+data AbcTune 
+    = AbcTune 
+        TuneHeader 
+        TuneBody
     deriving (Eq, Ord, Show)
 
 -- TODO verify X, T and K fields
-data TuneHeader = TuneHeader [Information]
+data TuneHeader 
+    = TuneHeader 
+        [Information]
     deriving (Eq, Ord, Show)
 
 type TuneBody = [Music]
@@ -168,19 +177,25 @@ data Decoration
 -- Base types
 
 newtype Duration = Duration { getDuration :: Rational }
-    deriving (Eq, Ord, Show, Enum, Num, Fractional, Real, RealFrac)
+    deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
 data PitchClass = C | D | E | F | G | A | B
-    deriving (Eq, Ord, Show, Enum)
+    deriving (Eq, Ord, Show, Enum, Bounded)
 
 data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
-    deriving (Eq, Ord, Show, Enum)
+    deriving (Eq, Ord, Show, Enum, Bounded)
 
 newtype Octave = Octave { getOctave :: Int }
-    deriving (Eq, Ord, Show, Enum)
+    deriving (Eq, Ord, Show, Enum, Num, Real, Integral)
 
 newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
     deriving (Eq, Ord, Show)
+
+data StemDirection = Up | Down
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
+    deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | Barline, including special barlines and repeats.
 data Barline
@@ -191,15 +206,78 @@ data Barline
     | InvisibleBarline Barline
     deriving (Eq, Ord, Show)
 
-data Information 
-    = Information 
-        Char 
-        String
+-- TODO add elements
+data Information
+    = Area String
+    | Book String
+    | Composer String
+    | Discography String
+    | FileUrl String URI
+    | Group String
+    | History String
+
+    | Instruction Directive
+    | Key Key
+    | UnitNoteLength Duration
+
+    | Meter Meter
+    -- Macros not supported
+    | Notes String
+    | Origin String
+    | Parts -- TODO
+
+    | Tempo Tempo
+    | Rhythm String -- Polska, marsch etc.
+    -- Remarks are discarded
+    | Source String -- Uppland etc.
+
+    | SymbolLine Symbol 
+    | TuneTitle String
+    -- User defined not supported
+
+    | Voice VoiceProps
+    | Words String -- TODO include separators
+    | ReferenceNumber Integer
+    | Transcription String
     deriving (Eq, Ord, Show)
 
--- | Abc directive, unused at the moment.
-data Directive = Directive
+type Key = (PitchClass, Mode)                   
+
+-- | Optional string, beats, frequency (3.1.8)
+type Tempo = (Maybe String, [Duration], Duration)
+
+type Symbol = ()
+
+data VoiceProps
+    = VoiceProps
+        (Maybe String)
+        (Maybe String)
+        (Maybe StemDirection)
+        (Maybe Clef)
     deriving (Eq, Ord, Show)
+
+data Meter
+    = NoMeter
+    | Common
+    | Cut
+    | Simple Rational
+    | Compound [Integer] Integer
+    deriving (Eq, Ord, Show)
+
+data Mode
+    = Major
+    | Minor
+    | Ionian
+    | Dorian
+    | Phrygian
+    | Lydian
+    | Mixolydian
+    | Aeolian
+    | Locrian
+    deriving (Eq, Ord, Show)
+
+-- | Abc directive.
+type Directive = (String, String)
     
     
 
