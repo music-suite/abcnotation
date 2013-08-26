@@ -38,11 +38,12 @@ module Music.Abc (
 
         -- * Music
         Music(..),
-        MusicElement(..),
-
-        -- ** Notes
-        Note(..),
+        Chord(..),
+        Barline(..),
+        Annotation(..),
         ChordSymbol(..),
+        Decoration(..),
+        Dynamic(..),
 
         -- ** Time
         Duration(..),
@@ -59,25 +60,12 @@ module Music.Abc (
         Clef(..),
         Mode(..),
 
-        -- ** Misc
-        VoiceProperties(..),
-
-        -- ** Symbols
-        Symbol(..),
-
-        -- ** Articulation and dynamics
-        Decoration(..),
-        Dynamic(..),
-
-        -- ** Structure
-        Barline(..),
-        MultiRest(..),
-
         ----------------------------------------------------------------------
 
         -- * Information
         Information(..),
         Directive(..),
+        VoiceProperties(..),
 
         ----------------------------------------------------------------------
 
@@ -137,44 +125,53 @@ type TuneBody
 --------------------------------------------------------------------------------
 
 -- | One line of music code.
-type Music = [MusicElement]
-
-data MusicElement 
-    = MusicNote Note
-    | MusicRest MultiRest
-    | MusicBarline Barline
+data Music
+    = Chord Chord
+    | Barline Barline
+    | Tie Music
+    | Slur Music
+    | Beam Music
+    | Grace Music
+    | Tuplet Duration Music
+    | Decorate [Decoration] Music
+    | ChordSymbol ChordSymbol Music
+    | Annotate Annotation Music
+    | Sequence [Music] -- beam? music
     deriving (Eq, Ord, Show)
 
--- TODO tuplets (4.13)
--- TODO broken rhythm (4.4)
+data Annotation
+    = AnnotateLeft String
+    | AnnotateRight String
+    | AnnotateAbove String
+    | AnnotateBelow String
+    | AnnotateUnspecified String
+    deriving (Eq, Ord, Show)
+    
 -- TODO clefs and transposition (4.6)
--- TODO annotations (4.19)
 -- TODO redifinable symbols (4.16)
 -- TODO symbol lines (4.15)
+-- TODO symbol lyrics
 
 -- Note (4.20) 
-data Note = Note
-        Bool                            -- Whether it is a grace note
-        ChordSymbol 
-        Beam
-        Slur
-        Tie
-        [Decoration]
-        [Pitch]
+type Chord = (
+        [Pitch],
         (Maybe Duration)
+    )
+
+type ChordSymbol 
+    = String
+
+-- | Barline, including special barlines and repeats.
+data Barline
+    = SingleBarline
+    | DoubleBarline Bool Bool           -- thick? thick?
+    | Repeat Int Bool Bool              -- times end? begin?
+    | DottedBarline Barline
+    | InvisibleBarline Barline
     deriving (Eq, Ord, Show)
 
--- | Beams (4.7)
-type Beam = (Bool, Bool)
-
--- | Slurs (4.11)
-type Slur = (Bool, Bool)
-
--- | Ties (4.11)
-type Tie = (Bool, Bool)
-
--- | Chord symbols (4.18)
-type ChordSymbol = String
+-- TODO first and second repeats (4.9)
+-- TODO variant endings (4.10)
 
 
 -- | Decorations (4.14)
@@ -233,22 +230,6 @@ data Dynamic
     | SFZ
     deriving (Eq, Ord, Show)
 
--- Rests
-
-newtype MultiRest = MultiRest { getMultiRest :: Int }
-    deriving (Eq, Ord, Show)
-
--- | Barline, including special barlines and repeats.
-data Barline
-    = Barline
-    | DoubleBarline Bool Bool   -- thick? thick?
-    | Repeat Int Bool Bool      -- times end? begin?
-    | DottedBarline Barline
-    | InvisibleBarline Barline
-    deriving (Eq, Ord, Show)
-
--- TODO first and second repeats (4.9)
--- TODO variant endings (4.10)
 
 
 
@@ -304,7 +285,7 @@ data Information
     | Rhythm String                     -- ^ Rhythm type of tune.
     | Remark                            -- ^ Remarks (not supported)
     | Source String                     -- ^ Source material.
-    | SymbolLine Symbol
+    | SymbolLine
     | Title String                      -- ^ Title of tune.
     | UserDefined                       -- ^ User defined (not supported)
     | Voice VoiceProperties
@@ -317,8 +298,6 @@ type Key = (PitchClass, Mode)
 
 -- | Optional string, numerators, frequency (3.1.8)
 type Tempo = (Maybe String, [Duration], Duration)
-
-type Symbol = ()
 
 data VoiceProperties
     = VoiceProperties
