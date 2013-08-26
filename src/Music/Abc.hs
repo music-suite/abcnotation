@@ -74,11 +74,6 @@ module Music.Abc (
         showAbc
   ) where
 
-import Data.Semigroup
-import Network.URI (URI)
-
-
---------------------------------------------------------------------------------
 
 -- | A full ABC file (2.2).
 data AbcFile
@@ -119,7 +114,6 @@ data TuneHeader
 -- | One line of music code.
 type TuneBody 
     = [Music]
-
 
 
 --------------------------------------------------------------------------------
@@ -231,9 +225,6 @@ data Dynamic
     deriving (Eq, Ord, Show)
 
 
-
-
-
 --------------------------------------------------------------------------------
 
 -- Base types
@@ -270,7 +261,7 @@ data Information
     | Book String
     | Composer String
     | Discography String
-    | FileUrl String URI
+    | FileUrl String
     | Group String
     | History String
     | Instruction Directive
