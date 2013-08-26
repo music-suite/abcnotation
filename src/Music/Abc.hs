@@ -38,15 +38,11 @@ module Music.Abc (
 
         -- * Music
         Music(..),
+        MusicElement(..),
 
         -- ** Notes
         Note(..),
-        DecorationT(..),
-        SlurT(..),
-        BeamT(..),
-        GraceT(..),
-        DurationT(..),
-        RestT(..),
+        ChordSymbol(..),
 
         -- ** Time
         Duration(..),
@@ -69,7 +65,7 @@ module Music.Abc (
         -- ** Symbols
         Symbol(..),
 
-        -- ** Aarticulation and dynamics
+        -- ** Articulation and dynamics
         Decoration(..),
         Dynamic(..),
 
@@ -90,6 +86,7 @@ module Music.Abc (
         showAbc
   ) where
 
+import Data.Semigroup
 import Network.URI (URI)
 
 
@@ -140,47 +137,47 @@ type TuneBody
 --------------------------------------------------------------------------------
 
 -- | One line of music code.
-data Music
-    = Music 
-        [Either Note 
-            (Either MultiRest 
-                Barline)]
+type Music = [MusicElement]
+
+data MusicElement 
+    = MusicNote Note
+    | MusicRest MultiRest
+    | MusicBarline Barline
     deriving (Eq, Ord, Show)
 
+-- TODO tuplets (4.13)
 -- TODO broken rhythm (4.4)
-
--- Note (4.20) grace chordSym ann/dec acci note/rest octave dur
-type Note = DecorationT (SlurT (BeamT (GraceT (DurationT (RestT Pitch)))))
-
--- | Rests (4.5)
-type RestT a        = Maybe (Maybe a)       -- invisible/visible
-
 -- TODO clefs and transposition (4.6)
+-- TODO annotations (4.19)
+-- TODO redifinable symbols (4.16)
+-- TODO symbol lines (4.15)
+
+-- Note (4.20) 
+data Note = Note
+        Bool                            -- Whether it is a grace note
+        ChordSymbol 
+        Beam
+        Slur
+        Tie
+        [Decoration]
+        [Pitch]
+        (Maybe Duration)
+    deriving (Eq, Ord, Show)
 
 -- | Beams (4.7)
-type BeamT a        = (Bool, a, Bool)
+type Beam = (Bool, Bool)
 
 -- | Slurs (4.11)
-type SlurT a        = (Bool, a, Bool)
--- TODO ties (4.11)
+type Slur = (Bool, Bool)
 
--- | Grace notes (4.12)
-type GraceT a       = (Bool, a)
+-- | Ties (4.11)
+type Tie = (Bool, Bool)
 
--- TODO tuplets (4.13)
+-- | Chord symbols (4.18)
+type ChordSymbol = String
+
 
 -- | Decorations (4.14)
-type DecorationT a  = ([Decoration], a)
-type DurationT a    = (a, Duration)
-
--- TODO symbol lines (4.15)
--- TODO redifinable symbols (4.16)
-
--- TODO chords (4.17)
--- TODO chord symbols (4.18)
--- TODO annotations (4.19)
-
-
 data Decoration
     = Trill                   -- "tr" (trill mark)
     | TrillBegin              -- start of an extended trill
