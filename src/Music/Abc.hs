@@ -1,5 +1,5 @@
 
-{-# LANGUAGE TypeOperators, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE TypeOperators, OverloadedStrings, GeneralizedNewtypeDeriving #-}
 
 -------------------------------------------------------------------------------------
 -- |
@@ -76,6 +76,10 @@ module Music.Abc (
         showAbc
   ) where
 
+import Data.Maybe
+import Data.Semigroup
+import Text.Pretty hiding (Mode)
+
 
 -- | A full ABC file (2.2).
 data AbcFile
@@ -85,12 +89,24 @@ data AbcFile
         [Element]
     deriving (Eq, Ord, Show)
 
+instance Pretty AbcFile where
+    pretty (AbcFile version header elements) = mempty
+        <> "%abc-" <> string (fromMaybe "2.1" version) <> "\n"
+        <> pretty header <> "\n"
+        <> sepBy "\n" (fmap pretty elements) <> "\n"
+    
+    
 -- | File header (2.2.2).
 data FileHeader
     = FileHeader
         [Information]
         [Directive]
     deriving (Eq, Ord, Show)
+
+instance Pretty FileHeader where
+    pretty (FileHeader info directives) = mempty
+        <> sepBy "\n" (fmap pretty info) <> "\n"
+        <> sepBy "\n" (fmap pretty directives) <> "\n"
 
 -- | Either a tune, free text or typeset text (2.2.3).
 data Element
@@ -102,16 +118,30 @@ data Element
         String                          -- ^ Typeset text (2.2.3).
     deriving (Eq, Ord, Show)
 
+instance Pretty Element where
+    pretty (Tune a)         = pretty a
+    pretty (FreeText a)     = string a
+    pretty (TypesetText a)  = string a
+
 data AbcTune
     = AbcTune
         TuneHeader
         TuneBody
     deriving (Eq, Ord, Show)
 
+instance Pretty AbcTune where
+    pretty (AbcTune header elements) = mempty
+        <> pretty header <> "\n"
+        <> sepBy "\n" (fmap pretty elements) <> "\n"
+
 data TuneHeader
     = TuneHeader
         [Information]
     deriving (Eq, Ord, Show)
+
+instance Pretty TuneHeader where
+    pretty (TuneHeader info) =
+        sepBy "\n" (fmap pretty info) <> "\n"
 
 -- | One line of music code.
 type TuneBody 
@@ -134,6 +164,10 @@ data Music
     | ChordSymbol ChordSymbol Music
     | Sequence [Music] -- beam? music
     deriving (Eq, Ord, Show)
+
+instance Pretty Music where
+    pretty _ = "{Music}"
+    -- FIXME
 
 data Annotation
     = AnnotateLeft String
@@ -258,6 +292,7 @@ data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
 newtype Duration = Duration { getDuration :: Rational }
     deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
+-- | An information field (3).
 data Information
     = Area String
     | Book String
@@ -287,10 +322,135 @@ data Information
     | Transcription String
     deriving (Eq, Ord, Show)
 
+instance Pretty Information where
+    pretty a = string $ fieldName a ++ ": " ++ showField a
+    -- FIXME
+
+
+fieldName :: Information -> String
+fieldName = go
+    where
+        go (Area _)                 = "A"
+        go (Book _)                 = "B"
+        go (Composer _)             = "C"
+        go (Discography _)          = "D"
+        go (FileUrl _)              = "F"
+        go (Group _)                = "G"
+        go (History _)              = "H"
+        go (Instruction _)          = "I"
+        go (Key _)                  = "K"
+        go (UnitNoteLength _)       = "L"
+        go (Meter _)                = "M"
+        go Macro                    = "m"
+        go (Notes _)                = "N"
+        go (Origin _)               = "O"
+        go Parts                    = "O"
+        go (Tempo _)                = "Q"
+        go (Rhythm _)               = "R"
+        go Remark                   = "r"
+        go (Source _)               = "S"
+        go SymbolLine               = "s"
+        go (Title _)                = "T"
+        go UserDefined              = "U"
+        go (Voice _)                = "V"
+        go (Words _)                = "W"
+        go (ReferenceNumber _)      = "X"
+        go (Transcription _)        = "Z"
+
+-- (file header, tune header, tune body, inline)
+fieldAllowed :: Information -> (Bool, Bool, Bool, Bool)
+fieldAllowed = go
+    where
+        go (Area _)                 = (True, True, False, False)
+        go (Book _)                 = (True, True, False, False)
+        go (Composer _)             = (True, True, False, False)
+        go (Discography _)          = (True, True, False, False)
+        go (FileUrl _)              = (True, True, False, False)
+        go (Group _)                = (True, True, False, False)
+        go (History _)              = (True, True, False, False)
+        
+        go (Instruction _)          = (True, True, True, True)
+        go (Key _)                  = (False, True{-last-}, True, True)
+        go (UnitNoteLength _)       = (True, True, True, True)
+        go (Meter _)                = (True, True, True, True)
+        go Macro                    = (True, True, True, True)
+        go (Notes _)                = (True, True, True, True)
+        
+        go (Origin _)               = (True, True, False, False)
+        go Parts                    = (False, True, True, True)
+        go (Tempo _)                = (False, True, True, True)
+        go (Rhythm _)               = (True, True, True, True)
+        go Remark                   = (True, True, True, True)
+        
+        go (Source _)               = (True, True, False, False)
+        go SymbolLine               = (False, False, True, False)
+        go (Title _)                = (False, True{-second-}, True, False)
+        
+        go UserDefined              = (True, True, True, True)
+        go (Voice _)                = (False, True, True, True)
+        go (Words _)                = (False, True, True, False)
+        go (ReferenceNumber _)      = (False, True{-first-}, True, False)
+        go (Transcription _)        = (True, True, False, False)
+
+fieldAllowedInFileHeader a = r where (r,_,_,_) = fieldAllowed a
+fieldAllowedInTuneHeader a = r where (_,r,_,_) = fieldAllowed a
+fieldAllowedInTuneBody   a = r where (_,_,r,_) = fieldAllowed a
+fieldAllowedInline       a = r where (_,_,_,r) = fieldAllowed a
+
+showField :: Information -> String
+showField = go
+    where
+        go (Area a)                 = a
+        go (Book a)                 = a
+        go (Composer a)             = a
+        go (Discography a)          = a
+        go (FileUrl a)              = a
+        go (Group a)                = a
+        go (History a)              = a
+        go (Instruction a)          = show $ pretty a
+        go (Key a)                  = show $ pretty a
+        go (UnitNoteLength a)       = show $ pretty a
+        go (Meter a)                = show $ pretty a
+        go Macro                    = ""
+        go (Notes a)                = a
+        go (Origin a)               = a
+        go Parts                    = "" -- TODO
+        go (Tempo a)                = show $ pretty a
+        go (Rhythm a)               = a
+        go Remark                   = "" -- TODO
+        go (Source a)               = a
+        go SymbolLine               = "" -- TODO
+        go (Title a)                = a
+        go UserDefined              = "" -- TODO
+        go (Voice a)                = show $ pretty a
+        go (Words a)                = a
+        go (ReferenceNumber a)      = show a
+        go (Transcription a)        = a
+        
+instance Pretty Mode where
+    pretty _ = "{}"
+    -- FIXME
+instance Pretty Duration where
+    pretty _ = "{}"
+    -- FIXME
+instance Pretty Meter where
+    pretty _ = "{}"
+    -- FIXME
+instance Pretty PitchClass where
+    pretty _ = "{}"
+    -- FIXME
+instance Pretty Tempo where
+    pretty _ = "{}"
+    -- FIXME
+instance Pretty VoiceProperties where
+    pretty _ = "{}"
+    -- FIXME
+    
 type Key = (PitchClass, Mode)
 
 -- | Optional string, numerators, frequency (3.1.8)
-type Tempo = (Maybe String, [Duration], Duration)
+newtype Tempo = Tempo_ { getTempo :: (Maybe String, [Duration], Duration) }
+    deriving (Eq, Ord, Show)
 
 data VoiceProperties
     = VoiceProperties
@@ -321,7 +481,12 @@ data Mode
     deriving (Eq, Ord, Show)
 
 -- | Abc directive.
-type Directive = (String, String)
+newtype Directive = Directive { getDirective :: (String, String) }
+    deriving (Eq, Ord, Show)
+
+instance Pretty Directive where
+    pretty _ = "{Directive}"
+    -- FIXME
 
 
 
@@ -360,7 +525,9 @@ showAbc = error "Not impl"
 -}
 test = AbcFile 
     (Just "1.2")
-    (Just $ FileHeader [] []) 
+    (Just $ FileHeader [
+        Title "Collection"        
+    ] []) 
     [
         Tune (AbcTune 
             (TuneHeader [
@@ -373,7 +540,7 @@ test = AbcFile
                 Source              "Paul Hardy's Xmas Tunebook 2012",
                 Meter               (Simple $ 6/8),
                 UnitNoteLength      (1/8),
-                Tempo               (Nothing, [3/8], 60),
+                Tempo               (Tempo_ (Nothing, [3/8], 60)),
                 Key                 (C, Major),            
 
                 Words               "Silent night, holy night",
@@ -383,9 +550,12 @@ test = AbcFile
                 Words               "Sleep in heavenly peace",
                 Words               "Sleep in heavenly peace"
             ]) 
-            [])
+            [
+                Chord ([(Pitch (C,Sharp,0))], Just 1)
+            ])
     ]
 
+main = (putStrLn . show . pretty) test
 
 
 
