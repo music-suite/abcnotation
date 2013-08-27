@@ -17,6 +17,8 @@
 --
 -------------------------------------------------------------------------------------
 
+-- TODO compare https://github.com/sergi/abcnode/blob/master/parser.pegjs
+
 module Music.Abc (
 
         ----------------------------------------------------------------------
@@ -127,9 +129,9 @@ data Music
     | Beam Music
     | Grace Music
     | Tuplet Duration Music
-    | Decorate [Decoration] Music
-    | ChordSymbol ChordSymbol Music
+    | Decorate Decoration Music
     | Annotate Annotation Music
+    | ChordSymbol ChordSymbol Music
     | Sequence [Music] -- beam? music
     deriving (Eq, Ord, Show)
 
