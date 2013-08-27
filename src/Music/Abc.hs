@@ -263,34 +263,8 @@ data Dynamic
 
 --------------------------------------------------------------------------------
 
--- Base types
+-- Information
 
--- | Accidentals (4.2).
-data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
-    deriving (Eq, Ord, Show, Enum, Bounded)
-
--- | Pitch class (4.1).
-data PitchClass = C | D | E | F | G | A | B
-    deriving (Eq, Ord, Show, Enum, Bounded)
-
--- | Octaves (4.1).
-newtype Octave = Octave { getOctave :: Int }
-    deriving (Eq, Ord, Show, Enum, Num, Real, Integral)
-
--- | Pitch (4.1, 4.2).
-newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
-    deriving (Eq, Ord, Show)
-
-
-data StemDirection = Up | Down
-    deriving (Eq, Ord, Show, Enum, Bounded)
-
-data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
-    deriving (Eq, Ord, Show, Enum, Bounded)
-
--- | Duration (4.3).
-newtype Duration = Duration { getDuration :: Rational }
-    deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
 -- | An information field (3).
 data Information
@@ -427,9 +401,37 @@ showField = go
         go (ReferenceNumber a)      = show a
         go (Transcription a)        = a
         
-instance Pretty Mode where
-    pretty _ = "{}"
-    -- FIXME
+
+--------------------------------------------------------------------------------
+
+-- Base types
+
+-- | Accidentals (4.2).
+data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | Pitch class (4.1).
+data PitchClass = C | D | E | F | G | A | B
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | Octaves (4.1).
+newtype Octave = Octave { getOctave :: Int }
+    deriving (Eq, Ord, Show, Enum, Num, Real, Integral)
+
+-- | Pitch (4.1, 4.2).
+newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
+    deriving (Eq, Ord, Show)
+
+data StemDirection = Up | Down
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | Duration (4.3).
+newtype Duration = Duration { getDuration :: Rational }
+    deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
+
 instance Pretty Duration where
     pretty _ = "{}"
     -- FIXME
@@ -445,7 +447,8 @@ instance Pretty Tempo where
 instance Pretty VoiceProperties where
     pretty _ = "{}"
     -- FIXME
-    
+
+
 type Key = (PitchClass, Mode)
 
 -- | Optional string, numerators, frequency (3.1.8)
@@ -479,6 +482,10 @@ data Mode
     | Aeolian
     | Locrian
     deriving (Eq, Ord, Show)
+
+instance Pretty Mode where
+    pretty _ = "{Mode}"
+    -- FIXME    
 
 -- | Abc directive.
 newtype Directive = Directive { getDirective :: (String, String) }
