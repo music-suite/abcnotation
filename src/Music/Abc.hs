@@ -124,13 +124,13 @@ type TuneBody
 data Music
     = Chord Chord
     | Barline Barline
-    | Tie Music
-    | Slur Music
-    | Beam Music
+    | Tie Music
+    | Slur Music
+    | Beam Music
     | Grace Music
-    | Tuplet Duration Music
+    | Tuplet Duration Music
     | Decorate Decoration Music
-    | Annotate Annotation Music
+    | Annotate Annotation Music
     | ChordSymbol ChordSymbol Music
     | Sequence [Music] -- beam? music
     deriving (Eq, Ord, Show)
@@ -196,7 +196,7 @@ data Decoration
     | Open                    -- small circle above note indicating open string or harmonic
     | Thumb                   -- cello thumb symbol
     | Breath                  -- a breath mark (apostrophe-like) after note
-    | Dynamic Dynamic         -- Dynamics
+    | Dynamic Dynamic         -- Dynamics
     | Crescendo               -- start of a crescendo mark
     | EndCrescendo            -- end of a crescendo mark, placed after the last note
     | Diminuendo              -- start of a diminuendo mark
@@ -232,7 +232,7 @@ data Dynamic
 -- Base types
 
 -- | Accidentals (4.2).
-data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
+data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
     deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | Pitch class (4.1).
@@ -360,7 +360,7 @@ showAbc = error "Not impl"
 -}
 test = AbcFile 
     (Just "1.2")
-    (Just $ FileHeader [] []) 
+    (Just $ FileHeader [] []) 
     [
         Tune (AbcTune 
             (TuneHeader [
