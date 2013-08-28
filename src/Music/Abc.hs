@@ -473,12 +473,9 @@ newtype Duration = Duration { getDuration :: Rational }
     deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
 instance Pretty Duration where
-    pretty = string . showRat . getDuration
-        where 
-            showRat x
-                | denominator x == 1  = show (numerator x)
-                | otherwise           = (show $ numerator x) ++ "/" ++ (show $ denominator x)
+    pretty = string . showRatio . getDuration
 
+            
 data Meter
     = NoMeter
     | Common
@@ -488,8 +485,12 @@ data Meter
     deriving (Eq, Ord, Show)
 
 instance Pretty Meter where
-    pretty _ = "{Meter}"
-    -- FIXME
+    pretty = go
+        where
+            go Common           = "C"
+            go Cut              = "C|"
+            go (Simple a)       = string $ showRatio a
+            go (Compound as a)  = sepBy "+" (fmap integer as) <> "/" <> integer a
 
 
 
@@ -498,13 +499,14 @@ instance Pretty Meter where
 
 
 
-
-newtype Key = Key_ (PitchClass, Mode)
+newtype Key = Key_ (Integer, Mode)
     deriving (Eq, Ord, Show)
 
 instance Pretty Key where
-    pretty _ = "{Key}"
-    -- FIXME
+    pretty (Key_ (tonic, mode)) = prettyTonic tonic <+> pretty mode
+        where
+            prettyTonic a = case a of
+                0 -> "C"
 
 data Mode
     = Major
@@ -519,8 +521,17 @@ data Mode
     deriving (Eq, Ord, Show)
 
 instance Pretty Mode where
-    pretty _ = "{Mode}"
-    -- FIXME    
+    pretty = go
+        where
+            go Major        = ""
+            go Minor        = "minor"
+            go Ionian       = "ionian"
+            go Dorian       = "dorian"
+            go Phrygian     = "phrygian"
+            go Lydian       = "lydian"
+            go Mixolydian   = "mixolydian"
+            go Aeolian      = "aeolian"
+            go Locrian      = "locrian"
 
 
 
@@ -530,8 +541,8 @@ newtype Tempo = Tempo_ { getTempo :: (Maybe String, [Duration], Duration) }
     deriving (Eq, Ord, Show)
 
 instance Pretty Tempo where
-    pretty _ = "{Tempo}"
-    -- FIXME
+    pretty (Tempo_ (str, durs, bpm)) = 
+        pretty str <+> (hsep (fmap pretty durs) <> "=" <> pretty bpm)
 
 data VoiceProperties
     = VoiceProperties
@@ -620,33 +631,8 @@ test = AbcFile
                 Source              "Paul Hardy's Xmas Tunebook 2012",
                 Meter               (Simple $ 6/8),
                 UnitNoteLength      (1/8),
-                Tempo               (Tempo_ (Nothing, [3/8], 60)),
-                Key                 (Key_ (C, Major)),            
-
-                Words               "Silent night, holy night",
-                Words               "All is calm, all is bright",
-                Words               "Round yon Virgin Mother and Child",
-                Words               "Holy Infant so tender and mild",
-                Words               "Sleep in heavenly peace",
-                Words               "Sleep in heavenly peace"
-            ]) 
-            [
-                Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1))
-            ])
-            ,
-        Tune (AbcTune 
-            (TuneHeader [
-                ReferenceNumber     19004,
-                Title               "Silent Night",
-                Title               "Stille Nacht! Heilige Nacht!",
-                Rhythm              "Air",
-                Composer            "Franz Xaver Gruber, 1818",
-                Origin              "Austria",
-                Source              "Paul Hardy's Xmas Tunebook 2012",
-                Meter               (Simple $ 6/8),
-                UnitNoteLength      (1/8),
-                Tempo               (Tempo_ (Nothing, [3/8], 60)),
-                Key                 (Key_ (C, Major)),            
+                Tempo               (Tempo_ (Just "Andante", [3/8], 60)),
+                Key                 (Key_ (0, Minor)),            
 
                 Words               "Silent night, holy night",
                 Words               "All is calm, all is bright",
@@ -666,4 +652,10 @@ main = (putStrLn . show . pretty) test
 
 
 
+
+
+showRatio :: (Integral a, Show a) => Ratio a -> String
+showRatio x
+    | denominator x == 1  = show (numerator x)
+    | otherwise           = (show $ numerator x) ++ "/" ++ (show $ denominator x)
 
