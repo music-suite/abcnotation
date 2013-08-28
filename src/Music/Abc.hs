@@ -77,6 +77,7 @@ module Music.Abc (
   ) where
 
 import Data.Maybe
+import Data.Ratio
 import Data.Char
 import Data.Semigroup
 import Text.Pretty hiding (Mode)
@@ -112,7 +113,7 @@ data FileHeader
 instance Pretty FileHeader where
     pretty (FileHeader info directives) = mempty
         <> sepBy "\n" (fmap pretty info) <> "\n"
-        <> sepBy "\n" (fmap pretty directives) <> "\n"
+        <> sepBy "\n" (fmap pretty directives)
 
 
 -- | Either a tune, free text or typeset text (2.2.3).
@@ -150,7 +151,7 @@ data TuneHeader
 
 instance Pretty TuneHeader where
     pretty (TuneHeader info) =
-        sepBy "\n" (fmap pretty info) <> "\n"
+        sepBy "\n" (fmap pretty info)
 
 
 -- | One line of music code.
@@ -179,7 +180,9 @@ data Music
     deriving (Eq, Ord, Show)
 
 instance Pretty Music where
-    pretty _ = "{Music}"
+    pretty = go
+        where
+            go (Chord a) = pretty a
     -- FIXME
 
 
@@ -197,10 +200,20 @@ data Annotation
 -- TODO symbol lyrics
 
 -- Note (4.20) 
-type Chord = (
+newtype Chord = Chord_ { getChord :: (
         [Pitch],
         (Maybe Duration)
-    )
+    ) }
+    deriving (Eq, Ord, Show)
+
+instance Pretty Chord where
+    -- TODO skip duration if zero
+    pretty (Chord_ ([], dur))       = ""
+    pretty (Chord_ ([pitch], dur))  =
+        pretty pitch <> pretty dur
+    pretty (Chord_ (pitches, dur))  =
+        brackets (sepBy "" (fmap pretty pitches)) <> pretty dur
+
 
 type ChordSymbol 
     = String
@@ -420,14 +433,14 @@ showField = go
 -- Base types
 
 -- | Pitch (4.1, 4.2).
-newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
+newtype Pitch = Pitch { getPitch :: (PitchClass, Maybe Accidental, Octave) }
     deriving (Eq, Ord, Show)
 
 instance Pretty Pitch where
-    pretty (Pitch (cl, acc, oct)) = string $
+    pretty (Pitch (cl, acc, oct)) = pretty acc <> (string $
         (if oct <= 0 then id else fmap toLower) (show cl)
         ++ replicate (negate (fromIntegral oct) `max` 0) ','
-        ++ replicate (fromIntegral (oct - 1) `max` 0) '\''
+        ++ replicate (fromIntegral (oct - 1) `max` 0) '\'')
 
 -- | Pitch class (4.1).
 data PitchClass = C | D | E | F | G | A | B
@@ -436,6 +449,15 @@ data PitchClass = C | D | E | F | G | A | B
 -- | Accidentals (4.2).
 data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
     deriving (Eq, Ord, Show, Enum, Bounded)
+
+instance Pretty Accidental where
+    pretty = go
+        where
+            go DoubleFlat   = "__"
+            go Flat         = "_"
+            go Natural      = "="
+            go Sharp        = "^"
+            go DoubleSharp  = "^^"
 
 -- | Octaves (4.1).
 newtype Octave = Octave { getOctave :: Int }
@@ -451,8 +473,11 @@ newtype Duration = Duration { getDuration :: Rational }
     deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
 instance Pretty Duration where
-    pretty _ = "{Duration}"
-    -- FIXME
+    pretty = string . showRat . getDuration
+        where 
+            showRat x
+                | denominator x == 1  = show (numerator x)
+                | otherwise           = (show $ numerator x) ++ "/" ++ (show $ denominator x)
 
 data Meter
     = NoMeter
@@ -606,8 +631,34 @@ test = AbcFile
                 Words               "Sleep in heavenly peace"
             ]) 
             [
-                Chord ([(Pitch (C,Sharp,0))], Just 1)
+                Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1))
             ])
+            ,
+        Tune (AbcTune 
+            (TuneHeader [
+                ReferenceNumber     19004,
+                Title               "Silent Night",
+                Title               "Stille Nacht! Heilige Nacht!",
+                Rhythm              "Air",
+                Composer            "Franz Xaver Gruber, 1818",
+                Origin              "Austria",
+                Source              "Paul Hardy's Xmas Tunebook 2012",
+                Meter               (Simple $ 6/8),
+                UnitNoteLength      (1/8),
+                Tempo               (Tempo_ (Nothing, [3/8], 60)),
+                Key                 (Key_ (C, Major)),            
+
+                Words               "Silent night, holy night",
+                Words               "All is calm, all is bright",
+                Words               "Round yon Virgin Mother and Child",
+                Words               "Holy Infant so tender and mild",
+                Words               "Sleep in heavenly peace",
+                Words               "Sleep in heavenly peace"
+            ]) 
+            [
+                Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1))
+            ])
+
     ]
 
 main = (putStrLn . show . pretty) test
