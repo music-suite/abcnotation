@@ -81,6 +81,11 @@ import Data.Semigroup
 import Text.Pretty hiding (Mode)
 
 
+--------------------------------------------------------------------------------
+
+-- File structure
+
+
 -- | A full ABC file (2.2).
 data AbcFile
     = AbcFile
@@ -108,6 +113,7 @@ instance Pretty FileHeader where
         <> sepBy "\n" (fmap pretty info) <> "\n"
         <> sepBy "\n" (fmap pretty directives) <> "\n"
 
+
 -- | Either a tune, free text or typeset text (2.2.3).
 data Element
     = Tune
@@ -123,6 +129,7 @@ instance Pretty Element where
     pretty (FreeText a)     = string a
     pretty (TypesetText a)  = string a
 
+
 data AbcTune
     = AbcTune
         TuneHeader
@@ -134,6 +141,7 @@ instance Pretty AbcTune where
         <> pretty header <> "\n"
         <> sepBy "\n" (fmap pretty elements) <> "\n"
 
+
 data TuneHeader
     = TuneHeader
         [Information]
@@ -143,12 +151,16 @@ instance Pretty TuneHeader where
     pretty (TuneHeader info) =
         sepBy "\n" (fmap pretty info) <> "\n"
 
+
 -- | One line of music code.
 type TuneBody 
     = [Music]
 
 
 --------------------------------------------------------------------------------
+
+-- Music
+
 
 -- | One line of music code.
 data Music
@@ -168,6 +180,7 @@ data Music
 instance Pretty Music where
     pretty _ = "{Music}"
     -- FIXME
+
 
 data Annotation
     = AnnotateLeft String
@@ -298,7 +311,6 @@ data Information
 
 instance Pretty Information where
     pretty a = string $ fieldName a ++ ": " ++ showField a
-    -- FIXME
 
 
 fieldName :: Information -> String
@@ -406,62 +418,38 @@ showField = go
 
 -- Base types
 
--- | Accidentals (4.2).
-data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
-    deriving (Eq, Ord, Show, Enum, Bounded)
+-- | Pitch (4.1, 4.2).
+newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
+    deriving (Eq, Ord, Show)
+
+instance Pretty Pitch where
+    pretty _ = "{Pitch}"
+    -- FIXME
 
 -- | Pitch class (4.1).
 data PitchClass = C | D | E | F | G | A | B
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+-- | Accidentals (4.2).
+data Accidental = DoubleFlat | Flat | Natural | Sharp | DoubleSharp
     deriving (Eq, Ord, Show, Enum, Bounded)
 
 -- | Octaves (4.1).
 newtype Octave = Octave { getOctave :: Int }
     deriving (Eq, Ord, Show, Enum, Num, Real, Integral)
 
--- | Pitch (4.1, 4.2).
-newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
-    deriving (Eq, Ord, Show)
 
-data StemDirection = Up | Down
-    deriving (Eq, Ord, Show, Enum, Bounded)
 
-data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
-    deriving (Eq, Ord, Show, Enum, Bounded)
+
+
 
 -- | Duration (4.3).
 newtype Duration = Duration { getDuration :: Rational }
     deriving (Eq, Ord, Show, Enum, Num, Real, Fractional, RealFrac)
 
 instance Pretty Duration where
-    pretty _ = "{}"
+    pretty _ = "{Duration}"
     -- FIXME
-instance Pretty Meter where
-    pretty _ = "{}"
-    -- FIXME
-instance Pretty PitchClass where
-    pretty _ = "{}"
-    -- FIXME
-instance Pretty Tempo where
-    pretty _ = "{}"
-    -- FIXME
-instance Pretty VoiceProperties where
-    pretty _ = "{}"
-    -- FIXME
-
-
-type Key = (PitchClass, Mode)
-
--- | Optional string, numerators, frequency (3.1.8)
-newtype Tempo = Tempo_ { getTempo :: (Maybe String, [Duration], Duration) }
-    deriving (Eq, Ord, Show)
-
-data VoiceProperties
-    = VoiceProperties
-        (Maybe String)
-        (Maybe String)
-        (Maybe StemDirection)
-        (Maybe Clef)
-    deriving (Eq, Ord, Show)
 
 data Meter
     = NoMeter
@@ -470,6 +458,25 @@ data Meter
     | Simple Rational
     | Compound [Integer] Integer
     deriving (Eq, Ord, Show)
+
+instance Pretty Meter where
+    pretty _ = "{Meter}"
+    -- FIXME
+
+
+
+
+
+
+
+
+
+newtype Key = Key_ (PitchClass, Mode)
+    deriving (Eq, Ord, Show)
+
+instance Pretty Key where
+    pretty _ = "{Key}"
+    -- FIXME
 
 data Mode
     = Major
@@ -487,6 +494,36 @@ instance Pretty Mode where
     pretty _ = "{Mode}"
     -- FIXME    
 
+
+
+
+-- | Optional string, numerators, frequency (3.1.8)
+newtype Tempo = Tempo_ { getTempo :: (Maybe String, [Duration], Duration) }
+    deriving (Eq, Ord, Show)
+
+instance Pretty Tempo where
+    pretty _ = "{Tempo}"
+    -- FIXME
+
+data VoiceProperties
+    = VoiceProperties
+        (Maybe String)
+        (Maybe String)
+        (Maybe StemDirection)
+        (Maybe Clef)
+    deriving (Eq, Ord, Show)
+
+instance Pretty VoiceProperties where
+    pretty _ = "{VoiceProperties}"
+    -- FIXME
+
+data StemDirection = Up | Down
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+data Clef = NoClef | Treble | Alto | Tenor | Bass | Perc
+    deriving (Eq, Ord, Show, Enum, Bounded)
+
+
 -- | Abc directive.
 newtype Directive = Directive { getDirective :: (String, String) }
     deriving (Eq, Ord, Show)
@@ -497,12 +534,20 @@ instance Pretty Directive where
 
 
 
+--------------------------------------------------------------------------------
+
+-- Utility
+
 readAbc :: String -> AbcFile
 readAbc = error "Not impl"
 
 showAbc :: AbcFile -> String
 showAbc = error "Not impl"
 
+
+--------------------------------------------------------------------------------
+
+-- Tests
 
 {-
     
@@ -548,7 +593,7 @@ test = AbcFile
                 Meter               (Simple $ 6/8),
                 UnitNoteLength      (1/8),
                 Tempo               (Tempo_ (Nothing, [3/8], 60)),
-                Key                 (C, Major),            
+                Key                 (Key_ (C, Major)),            
 
                 Words               "Silent night, holy night",
                 Words               "All is calm, all is bright",
