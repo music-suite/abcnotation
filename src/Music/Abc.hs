@@ -77,6 +77,7 @@ module Music.Abc (
   ) where
 
 import Data.Maybe
+import Data.Char
 import Data.Semigroup
 import Text.Pretty hiding (Mode)
 
@@ -423,8 +424,10 @@ newtype Pitch = Pitch { getPitch :: (PitchClass, Accidental, Octave) }
     deriving (Eq, Ord, Show)
 
 instance Pretty Pitch where
-    pretty _ = "{Pitch}"
-    -- FIXME
+    pretty (Pitch (cl, acc, oct)) = string $
+        (if oct <= 0 then id else fmap toLower) (show cl)
+        ++ replicate (negate (fromIntegral oct) `max` 0) ','
+        ++ replicate (fromIntegral (oct - 1) `max` 0) '\''
 
 -- | Pitch class (4.1).
 data PitchClass = C | D | E | F | G | A | B
