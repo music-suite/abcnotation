@@ -27,8 +27,8 @@ library
     exposed-modules:    Music.Abc
                         Music.Abc.Parser
     build-depends:      base                >= 4 && < 5,
-                        semigroups,
                         network,
+                        semigroups,
                         prettify,
                         parsec
     hs-source-dirs:     src
