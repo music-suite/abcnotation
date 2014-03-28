@@ -80,8 +80,11 @@ import Data.Maybe
 import Data.Ratio
 import Data.Char
 import Data.Semigroup
+import Data.List (intersperse)
 import Text.Pretty hiding (Mode)
-
+-- FIXME DEBUG
+import System.Process (system)
+-- FIXME DEBUG
 
 --------------------------------------------------------------------------------
 
@@ -183,6 +186,7 @@ instance Pretty Music where
     pretty = go
         where
             go (Chord a) = pretty a
+            go (Sequence as) = sepBy " " $ fmap pretty as
     -- FIXME
 
 
@@ -624,30 +628,55 @@ test = AbcFile
             (TuneHeader [
                 ReferenceNumber     19004,
                 Title               "Silent Night",
-                Title               "Stille Nacht! Heilige Nacht!",
-                Rhythm              "Air",
-                Composer            "Franz Xaver Gruber, 1818",
-                Origin              "Austria",
-                Source              "Paul Hardy's Xmas Tunebook 2012",
+                -- Title               "Stille Nacht! Heilige Nacht!",
+                -- Rhythm              "Air",
+                -- Composer            "Franz Xaver Gruber, 1818",
+                -- Origin              "Austria",
+                -- Source              "Paul Hardy's Xmas Tunebook 2012",
                 Meter               (Simple $ 6/8),
                 UnitNoteLength      (1/8),
                 Tempo               (Tempo_ (Just "Andante", [3/8], 60)),
-                Key                 (Key_ (0, Minor)),            
+                Key                 (Key_ (0, Minor))            
 
-                Words               "Silent night, holy night",
-                Words               "All is calm, all is bright",
-                Words               "Round yon Virgin Mother and Child",
-                Words               "Holy Infant so tender and mild",
-                Words               "Sleep in heavenly peace",
-                Words               "Sleep in heavenly peace"
+                -- Words               "Silent night, holy night",
+                -- Words               "All is calm, all is bright",
+                -- Words               "Round yon Virgin Mother and Child",
+                -- Words               "Holy Infant so tender and mild",
+                -- Words               "Sleep in heavenly peace",
+                -- Words               "Sleep in heavenly peace"
             ]) 
             [
-                Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1))
+                Sequence [
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (C,Nothing,1))], Just 1))
+                  ]
             ])
 
     ]
 
-main = (putStrLn . show . pretty) test
+main = do
+  let abc = show $ pretty test
+  -- print $ abc
+  writeFile "test.abc" abc
+  system "osascript -e 'tell application \"Google Chrome\" to tell the active tab of its first window' -e 'reload' -e 'end tell'"
+  
 
 
 

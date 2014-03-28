@@ -4,3 +4,5 @@ dist
 *.png
 test
 *.midi
+test.abc
+*.pdf
