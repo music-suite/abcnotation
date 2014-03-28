@@ -23,7 +23,6 @@ Based on the 2.1 standard.
   * Typeset text is ignored (§2.2.3)
   * Strict interpretation assumed (§12)
 
-
 ## Requirements
 
 * [Haskell Platform](http://www.haskell.org/platform)
