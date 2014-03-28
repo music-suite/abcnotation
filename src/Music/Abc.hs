@@ -649,22 +649,6 @@ test = AbcFile
                 Sequence [
                   Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
                   Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
                   Chord (Chord_ ([(Pitch (C,Nothing,1))], Just 1))
                   ]
             ])
