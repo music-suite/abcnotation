@@ -1,4 +1,6 @@
 
+[![Build Status](https://travis-ci.org/music-suite/abcnotation.svg?branch=master)](https://travis-ci.org/music-suite/abcnotation)
+
 # abcnotation
 
 This package contains a Haskell representation and parser for ABC notation. 
