@@ -154,9 +154,10 @@ instance Pretty TuneHeader where
         sepBy "\n" (fmap pretty info)
 
 
--- | One line of music code.
+-- | Lines of music code.
 type TuneBody 
     = [Music]
+-- TODO voices, see http://www.barfly.dial.pipex.com/multivoice.txt
 
 
 --------------------------------------------------------------------------------

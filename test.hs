@@ -41,7 +41,7 @@ test = AbcFile
         Tune (AbcTune 
             (TuneHeader [
                 ReferenceNumber     19004,
-                Title               "Silent Night",
+                -- Title               "Silent Night",
                 -- Title               "Stille Nacht! Heilige Nacht!",
                 -- Rhythm              "Air",
                 -- Composer            "Franz Xaver Gruber, 1818",
@@ -49,7 +49,7 @@ test = AbcFile
                 -- Source              "Paul Hardy's Xmas Tunebook 2012",
                 Meter               (Simple $ 6/8),
                 UnitNoteLength      (1/8),
-                Tempo               (Tempo_ (Just "Andante", [3/8], 60)),
+                -- Tempo               (Tempo_ (Just "Andante", [3/8], 60)),
                 Key                 (Key_ (0, Minor))            
 
                 -- Words               "Silent night, holy night",
@@ -62,9 +62,18 @@ test = AbcFile
             [
                 Sequence [
                   Chord (Chord_ ([(Pitch (C,Just Sharp,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
-                  Chord (Chord_ ([(Pitch (C,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (D,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (E,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (F,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (D,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (E,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (F,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (D,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (E,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (F,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (D,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (E,Nothing,0))], Just 1)),
+                  Chord (Chord_ ([(Pitch (F,Nothing,0))], Just 1)),
                   Chord (Chord_ ([(Pitch (C,Nothing,1))], Just 1))
                   ]
             ])
