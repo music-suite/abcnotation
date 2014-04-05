@@ -6,3 +6,4 @@ test
 *.midi
 test.abc
 *.pdf
+*sandbox.config
