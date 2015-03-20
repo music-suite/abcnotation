@@ -24,8 +24,8 @@ source-repository head
   location:             git://github.com/music-suite/abcnotation.git
 
 library
-    exposed-modules:    Music.Abc
-                        Music.Abc.Parser
+    exposed-modules:    Data.Music.Abc
+                        Data.Music.Abc.Parser
     build-depends:      base                >= 4 && < 5,
                         semigroups          >= 0.13.0.1 && < 1,
                         prettify,

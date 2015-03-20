@@ -19,7 +19,7 @@
 
 -- TODO compare https://github.com/sergi/abcnode/blob/master/parser.pegjs
 
-module Music.Abc (
+module Data.Music.Abc (
 
         ----------------------------------------------------------------------
 

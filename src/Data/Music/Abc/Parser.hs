@@ -11,7 +11,7 @@
 --
 -------------------------------------------------------------------------------------
 
-module Music.Abc.Parser (
+module Data.Music.Abc.Parser (
     parse
   ) where
 
@@ -24,7 +24,7 @@ import Text.Parsec hiding (parse)
 import Text.Parsec.Token
 import Text.Parsec.String
 
-import Music.Abc
+import Data.Music.Abc
 
 -- TODO information field verification (header/body)
 
