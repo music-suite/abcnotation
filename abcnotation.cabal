@@ -1,6 +1,6 @@
 
 name:                   abcnotation
-version:                1.9.0
+version:                1.9.2
 synopsis:               Haskell representation and parser for ABC notation.
 author:                 Hans Hoglund
 maintainer:             Hans Hoglund
